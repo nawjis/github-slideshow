@@ -1,13 +1,94 @@
-# Your GitHub Learning Lab Repository for Introducing GitHub
+# Bookmark Manager
 
-Welcome to **your** repository for your GitHub Learning Lab course. This repository will be used during the different activities that I will be guiding you through. See a word you don't understand? We've included an emoji 📖 next to some key terms. Click on it to see its definition.
+---
+Service exists here:
+https://github.com/gecharita/bookmark-manager-service
+---
 
-Oh! I haven't introduced myself...
+## Screenshots
 
-I'm the GitHub Learning Lab bot and I'm here to help guide you in your journey to learn and master the various topics covered in this course. I will be using Issue and Pull Request comments to communicate with you. In fact, I already added an issue for you to check out.
+#### Overview
+![Alt text](./src/assets/screenshots/b1-all.png?raw=true "Overview")
+#### Overview Edit mode
+![Alt text](./src/assets/screenshots/b2-all-edit.png?raw=true "Overview Edit mode")
+#### Tooltips
+![Alt text](./src/assets/screenshots/b3.png?raw=true "Tooltip Groups")
+![Alt text](./src/assets/screenshots/b4.png?raw=true "Tooltip Actions")
+![Alt text](./src/assets/screenshots/b5.png?raw=true "Tooltip Create")
+#### Dialogs
+![Alt text](./src/assets/screenshots/b6.png?raw=true "Dialog Create")
 
-![issue tab](https://lab.github.com/public/images/issue_tab.png)
 
-I'll meet you over there, can't wait to get started!
+## How to run the application
 
-This course is using the :sparkles: open source project [reveal.js](https://github.com/hakimel/reveal.js/). In some cases we’ve made changes to the history so it would behave during class, so head to the original project repo to learn more about the cool people behind this project.
+- Checkout/Download github repository https://github.com/gecharita/bookmark-manager
+- Go to the root folder and run: 
+```sh
+npm install
+ng serve
+```
+
+ - Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
+
+## Functionality
+
+The user can:
+1. add bookmarks.
+1. edit bookmarks.
+1. delete bookmarks.
+1. specify an existing or new group for a bookmark.
+1. delete a group by deleting all its bookmarks ('All' group cannot be deleted).
+1. view all bookmarks
+1. view the bookmarks grouped by a group.
+1. open a new tab with the url of the bookmark by clicking to the URL cell of the row.
+ 
+---
+## Description of the solution
+
+### Folder structure & files
+![Alt text](./src/assets/screenshots/b-folder-structure.png?raw=true "Dialog Edit")
+
+
+
+- **src/app/bookmark/state**: contains all the components that implement Redux inspired NgRx pattern for managing the state of the bookmark.
+
+- **src/app/app.state.ts**: contains the state (store) of the whole application (currently only bookmark's).
+
+- **src/app/services/bookmark.service.ts**: contains a mock service that returns some predefined bookmarks.
+
+### NgRx Actions
+- **GET_BOOKMARKS** = '[Bookmark] Get Bookmarks',
+- **CREATE_BOOKMARK**= '[Bookmark] Create Bookmark',
+- **EDIT_BOOKMARK**= '[Bookmark] Edit Bookmark',
+- **DELETE_BOOKMARK** = '[Bookmark] Delete Bookmark',
+- **LOAD_BOOKMARK_INIT** = '[Bookmark] Load Bookmark init',
+- **LOAD_BOOKMARK_DONE** = '[Bookmark] Load Bookmark done',
+- **RESTORE_BOOKMARKS** = '[Bookmark] Restore Bookmarks to current state'
+
+### NgRx Reducers
+The reducer "listens" to the following actions, apart from the default one:
+
+- **GET_BOOKMARKS**: returns the state with all bookmarks
+- **CREATE_BOOKMARK**: adds the new bookmark to the state and returns the updated state
+- **EDIT_BOOKMARK**: replaces the edited bookmark to the state and returns the updated state
+- **LOAD_BOOKMARK_DONE**:  adds the new bookmarks that were created by **bookmark.service.ts -> getDummyBookmarks()** to the state and returns the updated state
+- **RESTORE_BOOKMARKS**: it is not handled by the reducer, so the default case is executed. It was used in order to return the existing state after the action call, if needed.
+
+### NgRx Effects
+
+- **loadBookmarks**: It is triggered by **LOAD_BOOKMARK_INIT** actions & it calls **LOAD_BOOKMARK_DONE**.
+> As there is no error handling, the postfix _DONE was used instead of _SUCCESS for the LOAD_BOOKMARK_DONE action
+
+### NgRx Selectors 
+- **selectBookmarks**: returns an observable with all bookmarks
+- **selectBookmarksByGroup**: returns an observable with the bookmarks of the group that was passed as a parameter.
+- **selectBookmarksGroups**: returns an observable with all the groups & **'All'** group added by default
+
+### NgRx States
+- **interfaces**: Bookmarks, Bookmark
+- **initialStates**: initialBookmarksState, that contains 2 bookmarks
+
+## Initial data
+As a showcase initial data are loaded as follows:
+- by calling **LOAD_BOOKMARK_INIT** action in **src/app/bookmark/bookmark.component.ts** -> ngOnInit(). That action triggers an effect and the **bookmark manager service** (relevant Spring Boot Project on 8900 port) is called.
+> That is the only case that an effect is being called. In all other cases state modified directly in the reducer.
